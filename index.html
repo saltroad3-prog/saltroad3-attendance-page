@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>出席リンク</title>
+<style>
+  :root{
+    --bg:#f4f7fb;
+    --text:#16202a;
+    --muted:#667788;
+    --line:#dbe4ec;
+    --card:#ffffff;
+    --shadow:0 8px 24px rgba(15,23,42,.08);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:12px 12px 24px;
+  }
+  .hero{
+    background:linear-gradient(135deg,#0b607d,#1294b5);
+    color:#fff;
+    border-radius:20px;
+    padding:16px;
+    box-shadow:0 10px 26px rgba(11,96,125,.18);
+    margin-bottom:12px;
+  }
+  .hero h1{
+    margin:0 0 6px;
+    font-size:22px;
+    line-height:1.2;
+  }
+  .hero p{
+    margin:0;
+    font-size:12.5px;
+    line-height:1.55;
+    opacity:.96;
+  }
+  .note{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:10px 12px;
+    margin-bottom:14px;
+    font-size:12px;
+    color:var(--muted);
+  }
+  .day{
+    margin-bottom:14px;
+  }
+  .day-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin:0 0 8px;
+    font-size:16px;
+    color:#0b607d;
+  }
+  .day-title::before{
+    content:"";
+    width:8px;
+    height:8px;
+    border-radius:999px;
+    background:#0ea5c6;
+  }
+  .list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .card{
+    display:block;
+    text-decoration:none;
+    color:inherit;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:14px 14px 12px;
+    box-shadow:var(--shadow);
+    position:relative;
+    overflow:hidden;
+    transition:.15s ease;
+  }
+  .card:active,
+  .card:hover{
+    transform:translateY(-1px);
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:0;
+    bottom:0;
+    width:8px;
+  }
+  .top{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .title{
+    font-size:15px;
+    font-weight:800;
+    line-height:1.35;
+    margin:0;
+  }
+  .go{
+    flex:0 0 auto;
+    font-size:12px;
+    font-weight:700;
+    padding:6px 10px;
+    border-radius:999px;
+    color:#fff;
+  }
+  .meta{
+    margin-top:10px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    font-weight:700;
+    padding:6px 10px;
+    border-radius:999px;
+    background:#f3f6fa;
+    color:#48596a;
+  }
+
+  /* course colors */
+  .c1{background:linear-gradient(180deg,#fffaf7 0%,#ffffff 100%);}
+  .c1::before,.c1 .go{background:#f08b37;}
+  .c1 .pill.room{background:#fff0e2;color:#b76419;}
+
+  .c2{background:linear-gradient(180deg,#f8fbff 0%,#ffffff 100%);}
+  .c2::before,.c2 .go{background:#3b82f6;}
+  .c2 .pill.room{background:#e8f1ff;color:#245cc0;}
+
+  .c3{background:linear-gradient(180deg,#f8fff9 0%,#ffffff 100%);}
+  .c3::before,.c3 .go{background:#22a06b;}
+  .c3 .pill.room{background:#e7f8ee;color:#19764f;}
+
+  .c4{background:linear-gradient(180deg,#fbf8ff 0%,#ffffff 100%);}
+  .c4::before,.c4 .go{background:#8b5cf6;}
+  .c4 .pill.room{background:#f0eaff;color:#6c42cd;}
+
+  .c5{background:linear-gradient(180deg,#fff8fb 0%,#ffffff 100%);}
+  .c5::before,.c5 .go{background:#ec4899;}
+  .c5 .pill.room{background:#ffe8f4;color:#bf2f74;}
+
+  .c6{background:linear-gradient(180deg,#fffdf7 0%,#ffffff 100%);}
+  .c6::before,.c6 .go{background:#d4a017;}
+  .c6 .pill.room{background:#fff5d8;color:#9d7300;}
+
+  .c7{background:linear-gradient(180deg,#f7fcff 0%,#ffffff 100%);}
+  .c7::before,.c7 .go{background:#06b6d4;}
+  .c7 .pill.room{background:#e4faff;color:#09859b;}
+
+  .c8{background:linear-gradient(180deg,#fff8f6 0%,#ffffff 100%);}
+  .c8::before,.c8 .go{background:#ef4444;}
+  .c8 .pill.room{background:#ffeae7;color:#b73030;}
+
+  .c9{background:linear-gradient(180deg,#f7fff9 0%,#ffffff 100%);}
+  .c9::before,.c9 .go{background:#10b981;}
+  .c9 .pill.room{background:#e2fbf1;color:#0d8a60;}
+
+  .c10{background:linear-gradient(180deg,#fbfbff 0%,#ffffff 100%);}
+  .c10::before,.c10 .go{background:#6366f1;}
+  .c10 .pill.room{background:#ececff;color:#4d50d3;}
+
+  @media (min-width: 720px){
+    .wrap{padding-top:18px}
+    .list{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>出席リンク</h1>
+      <p>授業をタップすると、そのまま出席ページへ移動します。<br>同じ授業が連続しているものは1つにまとめてあります。</p>
+    </section>
+
+    <div class="note">
+      月曜2・3限＝621講義室／木曜3・4限＝611講義室／それ以外の表示授業＝612講義室
+    </div>
+
+    <section class="day">
+      <h2 class="day-title">月曜日</h2>
+      <div class="list">
+        <a class="card c1" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/621">
+          <div class="top">
+            <h3 class="title">トライボロジー</h3>
+            <div class="go">開く</div>
+          </div>
+          <div class="meta">
+            <span class="pill">2〜3限</span>
+            <span class="pill room">621講義室</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section class="day">
+      <h2 class="day-title">火曜日</h2>
+      <div class="list">
+        <a class="card c2" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/612">
+          <div class="top">
+            <h3 class="title">キャリアデザイン3</h3>
+            <div class="go">開く</div>
+          </div>
+          <div class="meta">
+            <span class="pill">2〜3限</span>
+            <span class="pill room">612講義室</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section class="day">
+      <h2 class="day-title">水曜日</h2>
+      <div class="list">
+        <a class="card c3" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/612">
+          <div class="top">
+            <h3 class="title">流体工学</h3>
+            <div class="go">開く</div>
+          </div>
+          <div class="meta">
+            <span class="pill">1〜2限</span>
+            <span class="pill room">612講義室</span>
+          </div>
+        </a>
+
+        <a class="card c6" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/612">
+          <div class="top">
+            <h3 class="title">システム制御理論</h3>
+            <div class="go">開く</div>
+          </div>
+          <div class="meta">
+            <span class="pill">3〜4限</span>
+            <span class="pill room">612講義室</span>
+          </div>
+        </a>
+
+        <a class="card c9" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/612">
+          <div class="top">
+            <h3 class="title">機械電子創成アドバンストレーニングⅠ</h3>
+            <div class="go">開く</div>
+          </div>
+          <div class="meta">
+            <span class="pill">6〜7限</span>
+            <span class="pill room">612講義室</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section class="day">
+      <h2 class="day-title">木曜日</h2>
+      <div class="list">
+        <a class="card c4" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/612">
+          <div class="top">
+            <h3 class="title">デジタル回路</h3>
+            <div class="go">開く</div>
+          </div>
+          <div class="meta">
+            <span class="pill">1〜2限</span>
+            <span class="pill room">612講義室</span>
+          </div>
+        </a>
+
+        <a class="card c7" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/611">
+          <div class="top">
+            <h3 class="title">政治と社会</h3>
+            <div class="go">開く</div>
+          </div>
+          <div class="meta">
+            <span class="pill">3〜4限</span>
+            <span class="pill room">611講義室</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section class="day">
+      <h2 class="day-title">金曜日</h2>
+      <div class="list">
+        <a class="card c5" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/612">
+          <div class="top">
+            <h3 class="title">情報通信工学</h3>
+            <div class="go">開く</div>
+          </div>
+          <div class="meta">
+            <span class="pill">2〜3限</span>
+            <span class="pill room">612講義室</span>
+          </div>
+        </a>
+
+        <a class="card c8" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/612">
+          <div class="top">
+            <h3 class="title">センサ工学</h3>
+            <div class="go">開く</div>
+          </div>
+          <div class="meta">
+            <span class="pill">5〜6限</span>
+            <span class="pill room">612講義室</span>
+          </div>
+        </a>
+
+        <a class="card c10" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/612">
+          <div class="top">
+            <h3 class="title">機械力学</h3>
+            <div class="go">開く</div>
+          </div>
+          <div class="meta">
+            <span class="pill">7〜8限</span>
+            <span class="pill room">612講義室</span>
+          </div>
+        </a>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
