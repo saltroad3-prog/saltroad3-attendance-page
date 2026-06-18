@@ -1,340 +1,548 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>出席リンク</title>
-<style>
-  :root{
-    --bg:#f4f7fb;
-    --text:#16202a;
-    --muted:#667788;
-    --line:#dbe4ec;
-    --card:#ffffff;
-    --shadow:0 8px 24px rgba(15,23,42,.08);
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
-    background:var(--bg);
-    color:var(--text);
-  }
-  .wrap{
-    max-width:760px;
-    margin:0 auto;
-    padding:12px 12px 24px;
-  }
-  .hero{
-    background:linear-gradient(135deg,#0b607d,#1294b5);
-    color:#fff;
-    border-radius:20px;
-    padding:16px;
-    box-shadow:0 10px 26px rgba(11,96,125,.18);
-    margin-bottom:12px;
-  }
-  .hero h1{
-    margin:0 0 6px;
-    font-size:22px;
-    line-height:1.2;
-  }
-  .hero p{
-    margin:0;
-    font-size:12.5px;
-    line-height:1.55;
-    opacity:.96;
-  }
-  .note{
-    background:#fff;
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:10px 12px;
-    margin-bottom:14px;
-    font-size:12px;
-    color:var(--muted);
-  }
-  .day{
-    margin-bottom:14px;
-  }
-  .day-title{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    margin:0 0 8px;
-    font-size:16px;
-    color:#0b607d;
-  }
-  .day-title::before{
-    content:"";
-    width:8px;
-    height:8px;
-    border-radius:999px;
-    background:#0ea5c6;
-  }
-  .list{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-  }
-  .card{
-    display:block;
-    text-decoration:none;
-    color:inherit;
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:18px;
-    padding:14px 14px 12px;
-    box-shadow:var(--shadow);
-    position:relative;
-    overflow:hidden;
-    transition:.15s ease;
-  }
-  .card:active,
-  .card:hover{
-    transform:translateY(-1px);
-  }
-  .card::before{
-    content:"";
-    position:absolute;
-    left:0;
-    top:0;
-    bottom:0;
-    width:8px;
-  }
-  .top{
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:10px;
-  }
-  .title{
-    font-size:15px;
-    font-weight:800;
-    line-height:1.35;
-    margin:0;
-  }
-  .go{
-    flex:0 0 auto;
-    font-size:12px;
-    font-weight:700;
-    padding:6px 10px;
-    border-radius:999px;
-    color:#fff;
-  }
-  .meta{
-    margin-top:10px;
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-  }
-  .pill{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    font-size:12px;
-    font-weight:700;
-    padding:6px 10px;
-    border-radius:999px;
-    background:#f3f6fa;
-    color:#48596a;
-  }
-
-  /* course colors */
-  .c1{background:linear-gradient(180deg,#fffaf7 0%,#ffffff 100%);}
-  .c1::before,.c1 .go{background:#f08b37;}
-  .c1 .pill.room{background:#fff0e2;color:#b76419;}
-
-  .c2{background:linear-gradient(180deg,#f8fbff 0%,#ffffff 100%);}
-  .c2::before,.c2 .go{background:#3b82f6;}
-  .c2 .pill.room{background:#e8f1ff;color:#245cc0;}
-
-  .c3{background:linear-gradient(180deg,#f8fff9 0%,#ffffff 100%);}
-  .c3::before,.c3 .go{background:#22a06b;}
-  .c3 .pill.room{background:#e7f8ee;color:#19764f;}
-
-  .c4{background:linear-gradient(180deg,#fbf8ff 0%,#ffffff 100%);}
-  .c4::before,.c4 .go{background:#8b5cf6;}
-  .c4 .pill.room{background:#f0eaff;color:#6c42cd;}
-
-  .c5{background:linear-gradient(180deg,#fff8fb 0%,#ffffff 100%);}
-  .c5::before,.c5 .go{background:#ec4899;}
-  .c5 .pill.room{background:#ffe8f4;color:#bf2f74;}
-
-  .c6{background:linear-gradient(180deg,#fffdf7 0%,#ffffff 100%);}
-  .c6::before,.c6 .go{background:#d4a017;}
-  .c6 .pill.room{background:#fff5d8;color:#9d7300;}
-
-  .c7{background:linear-gradient(180deg,#f7fcff 0%,#ffffff 100%);}
-  .c7::before,.c7 .go{background:#06b6d4;}
-  .c7 .pill.room{background:#e4faff;color:#09859b;}
-
-  .c8{background:linear-gradient(180deg,#fff8f6 0%,#ffffff 100%);}
-  .c8::before,.c8 .go{background:#ef4444;}
-  .c8 .pill.room{background:#ffeae7;color:#b73030;}
-
-  .c9{background:linear-gradient(180deg,#f7fff9 0%,#ffffff 100%);}
-  .c9::before,.c9 .go{background:#10b981;}
-  .c9 .pill.room{background:#e2fbf1;color:#0d8a60;}
-
-  .c10{background:linear-gradient(180deg,#fbfbff 0%,#ffffff 100%);}
-  .c10::before,.c10 .go{background:#6366f1;}
-  .c10 .pill.room{background:#ececff;color:#4d50d3;}
-
-  @media (min-width: 720px){
-    .wrap{padding-top:18px}
-    .list{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#176b73">
+  <title>出席リンク</title>
+  <style>
+    :root {
+      --bg: #f6f8f4;
+      --surface: #ffffff;
+      --surface-soft: #edf5f1;
+      --ink: #172321;
+      --muted: #5f6e6b;
+      --line: #d7e0dc;
+      --accent: #176b73;
+      --accent-strong: #0f4f59;
+      --accent-soft: #d8efea;
+      --orange: #d36b2b;
+      --shadow: 0 14px 38px rgba(23, 35, 33, 0.12);
+      --radius: 8px;
+      color-scheme: light;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-  }
-</style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(23, 107, 115, 0.12), transparent 34%),
+        linear-gradient(315deg, rgba(211, 107, 43, 0.12), transparent 28%),
+        var(--bg);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      opacity: 0.45;
+      background-image:
+        linear-gradient(rgba(23, 35, 33, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(23, 35, 33, 0.035) 1px, transparent 1px);
+      background-size: 26px 26px;
+      pointer-events: none;
+    }
+
+    .app {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 12px 0 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.55rem, 4vw, 2.45rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .status {
+      min-width: 7.5rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 9px 12px;
+      color: var(--accent-strong);
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 8px 24px rgba(23, 35, 33, 0.08);
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 2px;
+    }
+
+    .tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab {
+      flex: 0 0 auto;
+      min-width: 3.8rem;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 0 14px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.78);
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .tab[aria-selected="true"] {
+      color: #fff;
+      border-color: var(--accent);
+      background: var(--accent);
+      box-shadow: 0 8px 18px rgba(23, 107, 115, 0.24);
+    }
+
+    .view-toggle {
+      display: none;
+    }
+
+    .timetable-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: var(--shadow);
+    }
+
+    .timetable {
+      display: grid;
+      min-width: 900px;
+      grid-template-columns: 74px repeat(5, minmax(150px, 1fr));
+      grid-template-rows: 54px repeat(10, 58px);
+      position: relative;
+    }
+
+    .corner,
+    .day-head,
+    .period,
+    .empty {
+      display: grid;
+      place-items: center;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.74);
+    }
+
+    .corner,
+    .day-head,
+    .period {
+      font-weight: 800;
+    }
+
+    .corner {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .day-head.today {
+      color: var(--accent-strong);
+      background: var(--accent-soft);
+    }
+
+    .period {
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+
+    .empty {
+      background:
+        repeating-linear-gradient(
+          135deg,
+          rgba(23, 35, 33, 0.015),
+          rgba(23, 35, 33, 0.015) 7px,
+          transparent 7px,
+          transparent 14px
+        );
+    }
+
+    .lesson {
+      display: grid;
+      align-content: center;
+      gap: 6px;
+      min-width: 0;
+      margin: 6px;
+      border: 1px solid rgba(23, 107, 115, 0.16);
+      border-radius: var(--radius);
+      padding: 10px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      text-decoration: none;
+      box-shadow: 0 10px 20px rgba(23, 107, 115, 0.18);
+      transition: transform 140ms ease, box-shadow 140ms ease;
+    }
+
+    .lesson:hover,
+    .lesson:focus-visible {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 26px rgba(23, 107, 115, 0.24);
+      outline: 3px solid rgba(211, 107, 43, 0.34);
+      outline-offset: 2px;
+    }
+
+    .lesson.alt {
+      background: linear-gradient(135deg, #b95725, var(--orange));
+      border-color: rgba(211, 107, 43, 0.18);
+      box-shadow: 0 10px 20px rgba(211, 107, 43, 0.18);
+    }
+
+    .lesson-name {
+      display: block;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      font-size: 1rem;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .lesson-time {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      border-radius: 999px;
+      padding: 2px 8px;
+      color: rgba(255, 255, 255, 0.88);
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    .mobile-days {
+      display: none;
+    }
+
+    .day-panel {
+      display: none;
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        padding: 14px;
+      }
+
+      header {
+        align-items: flex-start;
+        padding-bottom: 12px;
+      }
+
+      .status {
+        min-width: 6.4rem;
+        font-size: 0.82rem;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .timetable-wrap {
+        display: none;
+      }
+
+      .mobile-days {
+        display: block;
+      }
+
+      .day-panel {
+        display: none;
+      }
+
+      .day-panel.active {
+        display: grid;
+        gap: 10px;
+      }
+
+      .period-card {
+        display: grid;
+        grid-template-columns: 52px 1fr;
+        gap: 10px;
+        min-height: 58px;
+      }
+
+      .period-badge {
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.78);
+        font-weight: 800;
+      }
+
+      .period-body {
+        display: grid;
+        min-width: 0;
+      }
+
+      .mobile-lesson {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 10px;
+        min-height: 58px;
+        border: 1px solid rgba(23, 107, 115, 0.16);
+        border-radius: var(--radius);
+        padding: 12px 13px;
+        color: #fff;
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+        text-decoration: none;
+        box-shadow: 0 10px 20px rgba(23, 107, 115, 0.16);
+      }
+
+      .mobile-lesson.alt {
+        background: linear-gradient(135deg, #b95725, var(--orange));
+      }
+
+      .mobile-lesson span:first-child {
+        min-width: 0;
+        overflow-wrap: anywhere;
+        font-weight: 800;
+        line-height: 1.25;
+      }
+
+      .arrow {
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        border: 1px solid rgba(255, 255, 255, 0.34);
+        border-radius: 999px;
+        font-size: 1.2rem;
+        line-height: 1;
+      }
+
+      .blank {
+        display: grid;
+        align-items: center;
+        min-height: 58px;
+        border: 1px dashed var(--line);
+        border-radius: var(--radius);
+        padding: 0 12px;
+        color: #8a9693;
+        background: rgba(255, 255, 255, 0.56);
+        font-size: 0.9rem;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="wrap">
-    <section class="hero">
+  <main class="app">
+    <header>
       <h1>出席リンク</h1>
-      <p>授業をタップすると、そのまま出席ページへ移動します。<br>同じ授業が連続しているものは1つにまとめてあります。</p>
-    </section>
+      <div class="status" id="todayLabel">時間割</div>
+    </header>
 
-    <div class="note">
-      月曜2・3限＝621講義室／木曜3・4限＝611講義室／それ以外の表示授業＝612講義室
+    <div class="toolbar" aria-label="曜日切り替え">
+      <div class="tabs" role="tablist" aria-label="曜日">
+        <button class="tab" type="button" role="tab" aria-selected="true" data-day="mon">月</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-day="tue">火</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-day="wed">水</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-day="thu">木</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-day="fri">金</button>
+      </div>
     </div>
 
-    <section class="day">
-      <h2 class="day-title">月曜日</h2>
-      <div class="list">
-        <a class="card c1" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/621">
-          <div class="top">
-            <h3 class="title">トライボロジー</h3>
-            <div class="go">開く</div>
-          </div>
-          <div class="meta">
-            <span class="pill">2〜3限</span>
-            <span class="pill room">621講義室</span>
-          </div>
-        </a>
-      </div>
+    <section class="timetable-wrap" aria-label="週の時間割">
+      <div class="timetable" id="desktopGrid"></div>
     </section>
 
-    <section class="day">
-      <h2 class="day-title">火曜日</h2>
-      <div class="list">
-        <a class="card c2" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/612">
-          <div class="top">
-            <h3 class="title">キャリアデザイン3</h3>
-            <div class="go">開く</div>
-          </div>
-          <div class="meta">
-            <span class="pill">2〜3限</span>
-            <span class="pill room">612講義室</span>
-          </div>
-        </a>
-      </div>
-    </section>
+    <section class="mobile-days" aria-label="曜日別の時間割" id="mobileDays"></section>
+  </main>
 
-    <section class="day">
-      <h2 class="day-title">水曜日</h2>
-      <div class="list">
-        <a class="card c3" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/612">
-          <div class="top">
-            <h3 class="title">流体工学</h3>
-            <div class="go">開く</div>
-          </div>
-          <div class="meta">
-            <span class="pill">1〜2限</span>
-            <span class="pill room">612講義室</span>
-          </div>
-        </a>
+  <script>
+    const LINKS = {
+      monTribology: "https://attendance.is.it-chiba.ac.jp/attendance/class_room/621",
+      politics: "https://attendance.is.it-chiba.ac.jp/attendance/class_room/611",
+      defaultRoom: "https://attendance.is.it-chiba.ac.jp/attendance/class_room/612"
+    };
 
-        <a class="card c6" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/612">
-          <div class="top">
-            <h3 class="title">システム制御理論</h3>
-            <div class="go">開く</div>
-          </div>
-          <div class="meta">
-            <span class="pill">3〜4限</span>
-            <span class="pill room">612講義室</span>
-          </div>
-        </a>
+    const DAYS = [
+      { key: "mon", label: "月", full: "月曜日" },
+      { key: "tue", label: "火", full: "火曜日" },
+      { key: "wed", label: "水", full: "水曜日" },
+      { key: "thu", label: "木", full: "木曜日" },
+      { key: "fri", label: "金", full: "金曜日" }
+    ];
 
-        <a class="card c9" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/612">
-          <div class="top">
-            <h3 class="title">機械電子創成アドバンストレーニングⅠ</h3>
-            <div class="go">開く</div>
-          </div>
-          <div class="meta">
-            <span class="pill">6〜7限</span>
-            <span class="pill room">612講義室</span>
-          </div>
-        </a>
-      </div>
-    </section>
+    const LESSONS = [
+      { day: "mon", start: 2, end: 3, name: "トライボロジー", url: LINKS.monTribology, tone: "alt" },
+      { day: "tue", start: 2, end: 3, name: "キャリアデザイン3", url: LINKS.defaultRoom },
+      { day: "tue", start: 5, end: 8, name: "設計製図講義演習", url: LINKS.defaultRoom, tone: "alt" },
+      { day: "wed", start: 1, end: 2, name: "流体工学", url: LINKS.defaultRoom },
+      { day: "wed", start: 3, end: 4, name: "システム制御理論", url: LINKS.defaultRoom, tone: "alt" },
+      { day: "wed", start: 6, end: 7, name: "アドバンスドラーニング", url: LINKS.defaultRoom },
+      { day: "thu", start: 1, end: 2, name: "デジタル回路", url: LINKS.defaultRoom },
+      { day: "thu", start: 3, end: 4, name: "政治と社会", url: LINKS.politics, tone: "alt" },
+      { day: "fri", start: 2, end: 3, name: "情報通信工学", url: LINKS.defaultRoom },
+      { day: "fri", start: 5, end: 6, name: "センサ工学", url: LINKS.defaultRoom, tone: "alt" },
+      { day: "fri", start: 7, end: 8, name: "機械力学", url: LINKS.defaultRoom }
+    ];
 
-    <section class="day">
-      <h2 class="day-title">木曜日</h2>
-      <div class="list">
-        <a class="card c4" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/612">
-          <div class="top">
-            <h3 class="title">デジタル回路</h3>
-            <div class="go">開く</div>
-          </div>
-          <div class="meta">
-            <span class="pill">1〜2限</span>
-            <span class="pill room">612講義室</span>
-          </div>
-        </a>
+    const desktopGrid = document.getElementById("desktopGrid");
+    const mobileDays = document.getElementById("mobileDays");
+    const todayLabel = document.getElementById("todayLabel");
+    const tabs = [...document.querySelectorAll(".tab")];
+    const dayIndex = new Date().getDay();
+    const todayKey = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][dayIndex];
+    const defaultDay = DAYS.some((day) => day.key === todayKey) ? todayKey : "mon";
 
-        <a class="card c7" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/611">
-          <div class="top">
-            <h3 class="title">政治と社会</h3>
-            <div class="go">開く</div>
-          </div>
-          <div class="meta">
-            <span class="pill">3〜4限</span>
-            <span class="pill room">611講義室</span>
-          </div>
-        </a>
-      </div>
-    </section>
+    function lessonFor(day, period) {
+      return LESSONS.find((lesson) => (
+        lesson.day === day && lesson.start <= period && lesson.end >= period
+      ));
+    }
 
-    <section class="day">
-      <h2 class="day-title">金曜日</h2>
-      <div class="list">
-        <a class="card c5" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/612">
-          <div class="top">
-            <h3 class="title">情報通信工学</h3>
-            <div class="go">開く</div>
-          </div>
-          <div class="meta">
-            <span class="pill">2〜3限</span>
-            <span class="pill room">612講義室</span>
-          </div>
-        </a>
+    function isLessonStart(day, period) {
+      const lesson = lessonFor(day, period);
+      return lesson && lesson.start === period;
+    }
 
-        <a class="card c8" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/612">
-          <div class="top">
-            <h3 class="title">センサ工学</h3>
-            <div class="go">開く</div>
-          </div>
-          <div class="meta">
-            <span class="pill">5〜6限</span>
-            <span class="pill room">612講義室</span>
-          </div>
-        </a>
+    function buildDesktop() {
+      const corner = document.createElement("div");
+      corner.className = "corner";
+      corner.style.gridRow = "1";
+      corner.style.gridColumn = "1";
+      corner.textContent = "限";
+      desktopGrid.appendChild(corner);
 
-        <a class="card c10" href="https://attendance.is.it-chiba.ac.jp/attendance/class_room/612">
-          <div class="top">
-            <h3 class="title">機械力学</h3>
-            <div class="go">開く</div>
-          </div>
-          <div class="meta">
-            <span class="pill">7〜8限</span>
-            <span class="pill room">612講義室</span>
-          </div>
-        </a>
-      </div>
-    </section>
-  </div>
+      DAYS.forEach((day, dayIndex) => {
+        const head = document.createElement("div");
+        head.className = `day-head${day.key === todayKey ? " today" : ""}`;
+        head.style.gridRow = "1";
+        head.style.gridColumn = `${dayIndex + 2}`;
+        head.textContent = day.label;
+        desktopGrid.appendChild(head);
+      });
+
+      for (let period = 1; period <= 10; period += 1) {
+        const periodCell = document.createElement("div");
+        periodCell.className = "period";
+        periodCell.style.gridRow = `${period + 1}`;
+        periodCell.style.gridColumn = "1";
+        periodCell.textContent = `${period}`;
+        desktopGrid.appendChild(periodCell);
+
+        DAYS.forEach((day, dayIndex) => {
+          const lesson = lessonFor(day.key, period);
+          if (lesson && !isLessonStart(day.key, period)) {
+            return;
+          }
+
+          if (lesson) {
+            const anchor = document.createElement("a");
+            anchor.className = `lesson ${lesson.tone || ""}`.trim();
+            anchor.href = lesson.url;
+            anchor.style.gridRow = `${period + 1} / span ${lesson.end - lesson.start + 1}`;
+            anchor.style.gridColumn = `${dayIndex + 2}`;
+            anchor.setAttribute("aria-label", `${day.full}${lesson.start}から${lesson.end}限 ${lesson.name}`);
+            anchor.innerHTML = `<span class="lesson-name">${lesson.name}</span><span class="lesson-time">${lesson.start}-${lesson.end}限</span>`;
+            desktopGrid.appendChild(anchor);
+          } else {
+            const empty = document.createElement("div");
+            empty.className = "empty";
+            empty.style.gridRow = `${period + 1}`;
+            empty.style.gridColumn = `${dayIndex + 2}`;
+            desktopGrid.appendChild(empty);
+          }
+        });
+      }
+    }
+
+    function buildMobile() {
+      DAYS.forEach((day) => {
+        const panel = document.createElement("div");
+        panel.className = "day-panel";
+        panel.dataset.day = day.key;
+
+        for (let period = 1; period <= 10; period += 1) {
+          const lesson = lessonFor(day.key, period);
+          if (lesson && lesson.start !== period) {
+            continue;
+          }
+
+          const row = document.createElement("div");
+          row.className = "period-card";
+
+          const badge = document.createElement("div");
+          badge.className = "period-badge";
+          badge.textContent = lesson ? `${lesson.start}-${lesson.end}` : `${period}`;
+
+          const body = document.createElement("div");
+          body.className = "period-body";
+
+          if (lesson) {
+            const anchor = document.createElement("a");
+            anchor.className = `mobile-lesson ${lesson.tone || ""}`.trim();
+            anchor.href = lesson.url;
+            anchor.setAttribute("aria-label", `${day.full}${lesson.start}から${lesson.end}限 ${lesson.name}`);
+            anchor.innerHTML = `<span>${lesson.name}</span><span class="arrow" aria-hidden="true">›</span>`;
+            body.appendChild(anchor);
+          } else {
+            const blank = document.createElement("div");
+            blank.className = "blank";
+            blank.textContent = "空き";
+            body.appendChild(blank);
+          }
+
+          row.appendChild(badge);
+          row.appendChild(body);
+          panel.appendChild(row);
+        }
+
+        mobileDays.appendChild(panel);
+      });
+    }
+
+    function selectDay(dayKey) {
+      tabs.forEach((tab) => {
+        tab.setAttribute("aria-selected", String(tab.dataset.day === dayKey));
+      });
+
+      document.querySelectorAll(".day-panel").forEach((panel) => {
+        panel.classList.toggle("active", panel.dataset.day === dayKey);
+      });
+
+      const selected = DAYS.find((day) => day.key === dayKey);
+      todayLabel.textContent = selected ? selected.full : "時間割";
+    }
+
+    buildDesktop();
+    buildMobile();
+    tabs.forEach((tab) => tab.addEventListener("click", () => selectDay(tab.dataset.day)));
+    selectDay(defaultDay);
+  </script>
 </body>
 </html>
