@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="出席リンク">
+  <rect width="512" height="512" rx="112" fill="#176b73"/>
+  <path d="M112 146c0-22 18-40 40-40h208c22 0 40 18 40 40v220c0 22-18 40-40 40H152c-22 0-40-18-40-40V146z" fill="#fff"/>
+  <path d="M112 178h288v54H112z" fill="#d36b2b"/>
+  <path d="M168 92v64M344 92v64" stroke="#fff" stroke-width="32" stroke-linecap="round"/>
+  <circle cx="182" cy="284" r="26" fill="#176b73"/>
+  <circle cx="256" cy="284" r="26" fill="#176b73"/>
+  <circle cx="330" cy="284" r="26" fill="#176b73"/>
+  <rect x="160" y="338" width="192" height="28" rx="14" fill="#d8efea"/>
+</svg>

@@ -2,8 +2,15 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#176b73">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="出席リンク">
+  <meta name="application-name" content="出席リンク">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <title>出席リンク</title>
   <style>
     :root {
@@ -17,6 +24,7 @@
       --accent-strong: #0f4f59;
       --accent-soft: #d8efea;
       --orange: #d36b2b;
+      --orange-strong: #a74d1e;
       --shadow: 0 14px 38px rgba(23, 35, 33, 0.12);
       --radius: 8px;
       color-scheme: light;
@@ -50,6 +58,11 @@
       pointer-events: none;
     }
 
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
     .app {
       width: min(1180px, 100%);
       margin: 0 auto;
@@ -61,7 +74,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 14px;
-      padding: 12px 0 18px;
+      padding: 12px 0 14px;
     }
 
     h1 {
@@ -85,15 +98,110 @@
       white-space: nowrap;
     }
 
+    .hero-status {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: stretch;
+      gap: 12px;
+      margin-bottom: 14px;
+      border: 1px solid rgba(23, 107, 115, 0.18);
+      border-radius: var(--radius);
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-status.now {
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+    }
+
+    .hero-status.next {
+      border-color: rgba(211, 107, 43, 0.22);
+      background:
+        linear-gradient(135deg, rgba(211, 107, 43, 0.12), transparent 54%),
+        rgba(255, 255, 255, 0.9);
+    }
+
+    .hero-copy {
+      min-width: 0;
+    }
+
+    .hero-kicker {
+      margin: 0 0 6px;
+      color: inherit;
+      font-size: 0.82rem;
+      font-weight: 800;
+      opacity: 0.78;
+    }
+
+    .hero-title {
+      margin: 0;
+      overflow-wrap: anywhere;
+      font-size: clamp(1.15rem, 3vw, 1.6rem);
+      line-height: 1.22;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      border: 1px solid rgba(23, 35, 33, 0.1);
+      border-radius: 999px;
+      padding: 3px 9px;
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .hero-status.now .pill {
+      border-color: rgba(255, 255, 255, 0.28);
+      background: rgba(255, 255, 255, 0.14);
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .primary-link {
+      display: inline-grid;
+      place-items: center;
+      align-self: center;
+      min-width: 92px;
+      min-height: 48px;
+      border-radius: var(--radius);
+      padding: 0 16px;
+      color: #fff;
+      background: var(--orange);
+      font-size: 0.96rem;
+      font-weight: 900;
+      text-decoration: none;
+      box-shadow: 0 12px 22px rgba(211, 107, 43, 0.24);
+    }
+
+    .hero-status.next .primary-link {
+      background: var(--accent);
+      box-shadow: 0 12px 22px rgba(23, 107, 115, 0.2);
+    }
+
     .toolbar {
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: 1fr auto auto;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       margin-bottom: 14px;
     }
 
-    .tabs {
+    .tabs,
+    .segmented {
       display: flex;
       gap: 6px;
       overflow-x: auto;
@@ -102,13 +210,15 @@
       padding-bottom: 2px;
     }
 
-    .tabs::-webkit-scrollbar {
+    .tabs::-webkit-scrollbar,
+    .segmented::-webkit-scrollbar {
       display: none;
     }
 
-    .tab {
+    .tab,
+    .mode-button,
+    .compact-toggle {
       flex: 0 0 auto;
-      min-width: 3.8rem;
       min-height: 42px;
       border: 1px solid var(--line);
       border-radius: var(--radius);
@@ -116,10 +226,16 @@
       color: var(--muted);
       background: rgba(255, 255, 255, 0.78);
       font: inherit;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
     }
 
+    .tab {
+      min-width: 3.8rem;
+    }
+
+    .mode-button[aria-pressed="true"],
+    .compact-toggle[aria-pressed="true"],
     .tab[aria-selected="true"] {
       color: #fff;
       border-color: var(--accent);
@@ -127,7 +243,139 @@
       box-shadow: 0 8px 18px rgba(23, 107, 115, 0.24);
     }
 
-    .view-toggle {
+    .day-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .period-card {
+      display: grid;
+      grid-template-columns: 62px minmax(0, 1fr);
+      gap: 10px;
+      min-height: 68px;
+    }
+
+    .period-card.empty-card {
+      display: none;
+    }
+
+    .show-empty .period-card.empty-card {
+      display: grid;
+    }
+
+    .period-badge {
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.78);
+      font-weight: 900;
+    }
+
+    .period-body {
+      display: grid;
+      min-width: 0;
+    }
+
+    .lesson-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      min-height: 68px;
+      border: 1px solid rgba(23, 107, 115, 0.16);
+      border-radius: var(--radius);
+      padding: 13px 14px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      text-decoration: none;
+      box-shadow: 0 10px 20px rgba(23, 107, 115, 0.16);
+      transition: transform 140ms ease, box-shadow 140ms ease;
+    }
+
+    .lesson-card.alt {
+      background: linear-gradient(135deg, #b95725, var(--orange));
+    }
+
+    .lesson-card.current {
+      outline: 3px solid rgba(211, 107, 43, 0.28);
+      outline-offset: 2px;
+      box-shadow: 0 16px 28px rgba(23, 107, 115, 0.24);
+    }
+
+    .lesson-card:hover,
+    .lesson-card:focus-visible {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 26px rgba(23, 107, 115, 0.24);
+      outline: 3px solid rgba(211, 107, 43, 0.34);
+      outline-offset: 2px;
+    }
+
+    .lesson-copy {
+      display: grid;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .lesson-name,
+    .lesson-card-title {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      font-weight: 900;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .lesson-card-title {
+      font-size: 1rem;
+    }
+
+    .lesson-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .lesson-badge {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 999px;
+      padding: 2px 8px;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.75rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .arrow {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(255, 255, 255, 0.34);
+      border-radius: 999px;
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    .blank {
+      display: grid;
+      align-items: center;
+      min-height: 68px;
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+      padding: 0 12px;
+      color: #8a9693;
+      background: rgba(255, 255, 255, 0.56);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .week-view[hidden],
+    .day-view[hidden] {
       display: none;
     }
 
@@ -161,7 +409,7 @@
     .corner,
     .day-head,
     .period {
-      font-weight: 800;
+      font-weight: 900;
     }
 
     .corner {
@@ -220,13 +468,14 @@
       box-shadow: 0 10px 20px rgba(211, 107, 43, 0.18);
     }
 
+    .lesson.current {
+      outline: 3px solid rgba(211, 107, 43, 0.34);
+      outline-offset: 1px;
+    }
+
     .lesson-name {
       display: block;
-      min-width: 0;
-      overflow-wrap: anywhere;
       font-size: 1rem;
-      font-weight: 800;
-      line-height: 1.25;
     }
 
     .lesson-time {
@@ -238,15 +487,7 @@
       padding: 2px 8px;
       color: rgba(255, 255, 255, 0.88);
       font-size: 0.76rem;
-      font-weight: 700;
-    }
-
-    .mobile-days {
-      display: none;
-    }
-
-    .day-panel {
-      display: none;
+      font-weight: 800;
     }
 
     @media (max-width: 760px) {
@@ -264,96 +505,34 @@
         font-size: 0.82rem;
       }
 
+      .hero-status {
+        grid-template-columns: 1fr;
+      }
+
+      .primary-link {
+        width: 100%;
+      }
+
       .toolbar {
         grid-template-columns: 1fr;
       }
 
-      .timetable-wrap {
-        display: none;
+      .segmented {
+        order: -1;
       }
 
-      .mobile-days {
-        display: block;
-      }
-
-      .day-panel {
-        display: none;
-      }
-
-      .day-panel.active {
-        display: grid;
-        gap: 10px;
+      .compact-toggle {
+        width: fit-content;
       }
 
       .period-card {
-        display: grid;
-        grid-template-columns: 52px 1fr;
-        gap: 10px;
-        min-height: 58px;
+        grid-template-columns: 54px minmax(0, 1fr);
+        min-height: 64px;
       }
 
-      .period-badge {
-        display: grid;
-        place-items: center;
-        border: 1px solid var(--line);
-        border-radius: var(--radius);
-        color: var(--muted);
-        background: rgba(255, 255, 255, 0.78);
-        font-weight: 800;
-      }
-
-      .period-body {
-        display: grid;
-        min-width: 0;
-      }
-
-      .mobile-lesson {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        align-items: center;
-        gap: 10px;
-        min-height: 58px;
-        border: 1px solid rgba(23, 107, 115, 0.16);
-        border-radius: var(--radius);
-        padding: 12px 13px;
-        color: #fff;
-        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-        text-decoration: none;
-        box-shadow: 0 10px 20px rgba(23, 107, 115, 0.16);
-      }
-
-      .mobile-lesson.alt {
-        background: linear-gradient(135deg, #b95725, var(--orange));
-      }
-
-      .mobile-lesson span:first-child {
-        min-width: 0;
-        overflow-wrap: anywhere;
-        font-weight: 800;
-        line-height: 1.25;
-      }
-
-      .arrow {
-        display: grid;
-        place-items: center;
-        width: 32px;
-        height: 32px;
-        border: 1px solid rgba(255, 255, 255, 0.34);
-        border-radius: 999px;
-        font-size: 1.2rem;
-        line-height: 1;
-      }
-
+      .lesson-card,
       .blank {
-        display: grid;
-        align-items: center;
-        min-height: 58px;
-        border: 1px dashed var(--line);
-        border-radius: var(--radius);
-        padding: 0 12px;
-        color: #8a9693;
-        background: rgba(255, 255, 255, 0.56);
-        font-size: 0.9rem;
+        min-height: 64px;
       }
     }
   </style>
@@ -365,7 +544,9 @@
       <div class="status" id="todayLabel">時間割</div>
     </header>
 
-    <div class="toolbar" aria-label="曜日切り替え">
+    <section class="hero-status" id="smartStatus" aria-live="polite"></section>
+
+    <div class="toolbar" aria-label="表示切り替え">
       <div class="tabs" role="tablist" aria-label="曜日">
         <button class="tab" type="button" role="tab" aria-selected="true" data-day="mon">月</button>
         <button class="tab" type="button" role="tab" aria-selected="false" data-day="tue">火</button>
@@ -373,51 +554,64 @@
         <button class="tab" type="button" role="tab" aria-selected="false" data-day="thu">木</button>
         <button class="tab" type="button" role="tab" aria-selected="false" data-day="fri">金</button>
       </div>
+      <div class="segmented" aria-label="表示モード">
+        <button class="mode-button" type="button" aria-pressed="true" data-view="day">今日</button>
+        <button class="mode-button" type="button" aria-pressed="false" data-view="week">週</button>
+      </div>
+      <button class="compact-toggle" type="button" aria-pressed="false" id="emptyToggle">空き</button>
     </div>
 
-    <section class="timetable-wrap" aria-label="週の時間割">
-      <div class="timetable" id="desktopGrid"></div>
-    </section>
+    <section class="day-view" id="dayView" aria-label="選択した曜日の時間割"></section>
 
-    <section class="mobile-days" aria-label="曜日別の時間割" id="mobileDays"></section>
+    <section class="week-view" id="weekView" aria-label="週の時間割" hidden>
+      <div class="timetable-wrap">
+        <div class="timetable" id="desktopGrid"></div>
+      </div>
+    </section>
   </main>
 
+  <script src="schedule.js"></script>
   <script>
-    const LINKS = {
-      monTribology: "https://attendance.is.it-chiba.ac.jp/attendance/class_room/621",
-      politics: "https://attendance.is.it-chiba.ac.jp/attendance/class_room/611",
-      defaultRoom: "https://attendance.is.it-chiba.ac.jp/attendance/class_room/612"
-    };
-
-    const DAYS = [
-      { key: "mon", label: "月", full: "月曜日" },
-      { key: "tue", label: "火", full: "火曜日" },
-      { key: "wed", label: "水", full: "水曜日" },
-      { key: "thu", label: "木", full: "木曜日" },
-      { key: "fri", label: "金", full: "金曜日" }
-    ];
-
-    const LESSONS = [
-      { day: "mon", start: 2, end: 3, name: "トライボロジー", url: LINKS.monTribology, tone: "alt" },
-      { day: "tue", start: 2, end: 3, name: "キャリアデザイン3", url: LINKS.defaultRoom },
-      { day: "tue", start: 5, end: 8, name: "設計製図講義演習", url: LINKS.defaultRoom, tone: "alt" },
-      { day: "wed", start: 1, end: 2, name: "流体工学", url: LINKS.defaultRoom },
-      { day: "wed", start: 3, end: 4, name: "システム制御理論", url: LINKS.defaultRoom, tone: "alt" },
-      { day: "wed", start: 6, end: 7, name: "アドバンスドラーニング", url: LINKS.defaultRoom },
-      { day: "thu", start: 1, end: 2, name: "デジタル回路", url: LINKS.defaultRoom },
-      { day: "thu", start: 3, end: 4, name: "政治と社会", url: LINKS.politics, tone: "alt" },
-      { day: "fri", start: 2, end: 3, name: "情報通信工学", url: LINKS.defaultRoom },
-      { day: "fri", start: 5, end: 6, name: "センサ工学", url: LINKS.defaultRoom, tone: "alt" },
-      { day: "fri", start: 7, end: 8, name: "機械力学", url: LINKS.defaultRoom }
-    ];
+    const data = window.ATTENDANCE_DATA;
+    const DAYS = data.days;
+    const PERIODS = data.periods;
+    const LESSONS = data.lessons;
 
     const desktopGrid = document.getElementById("desktopGrid");
-    const mobileDays = document.getElementById("mobileDays");
+    const dayView = document.getElementById("dayView");
+    const weekView = document.getElementById("weekView");
+    const smartStatus = document.getElementById("smartStatus");
     const todayLabel = document.getElementById("todayLabel");
+    const emptyToggle = document.getElementById("emptyToggle");
     const tabs = [...document.querySelectorAll(".tab")];
-    const dayIndex = new Date().getDay();
-    const todayKey = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][dayIndex];
+    const modeButtons = [...document.querySelectorAll(".mode-button")];
+    const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+    const todayKey = dayKeys[new Date().getDay()];
     const defaultDay = DAYS.some((day) => day.key === todayKey) ? todayKey : "mon";
+    let selectedDay = defaultDay;
+    let currentView = "day";
+    let showEmpty = false;
+
+    function minutes(value) {
+      const [hour, minute] = value.split(":").map(Number);
+      return hour * 60 + minute;
+    }
+
+    function dayByKey(dayKey) {
+      return DAYS.find((day) => day.key === dayKey);
+    }
+
+    function periodByNumber(number) {
+      return PERIODS.find((period) => period.number === number);
+    }
+
+    function lessonStartMinutes(lesson) {
+      return minutes(periodByNumber(lesson.start).start);
+    }
+
+    function lessonEndMinutes(lesson) {
+      return minutes(periodByNumber(lesson.end).end);
+    }
 
     function lessonFor(day, period) {
       return LESSONS.find((lesson) => (
@@ -430,7 +624,94 @@
       return lesson && lesson.start === period;
     }
 
+    function lessonsForDay(dayKey) {
+      return LESSONS
+        .filter((lesson) => lesson.day === dayKey)
+        .sort((a, b) => a.start - b.start);
+    }
+
+    function formatLessonTime(lesson) {
+      const start = periodByNumber(lesson.start).start;
+      const end = periodByNumber(lesson.end).end;
+      return `${start}-${end}`;
+    }
+
+    function formatPeriodRange(lesson) {
+      return `${lesson.start}-${lesson.end}限`;
+    }
+
+    function isCurrentLesson(lesson) {
+      if (lesson.day !== todayKey) {
+        return false;
+      }
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      return lessonStartMinutes(lesson) <= currentMinutes && currentMinutes <= lessonEndMinutes(lesson);
+    }
+
+    function findSmartLesson() {
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      const todayLessons = lessonsForDay(todayKey);
+      const current = todayLessons.find((lesson) => (
+        lessonStartMinutes(lesson) <= currentMinutes && currentMinutes <= lessonEndMinutes(lesson)
+      ));
+      if (current) {
+        return { type: "now", lesson: current, day: dayByKey(todayKey) };
+      }
+
+      const laterToday = todayLessons.find((lesson) => lessonStartMinutes(lesson) > currentMinutes);
+      if (laterToday) {
+        return { type: "next", lesson: laterToday, day: dayByKey(todayKey) };
+      }
+
+      const todayIndex = DAYS.findIndex((day) => day.key === todayKey);
+      const startIndex = todayIndex >= 0 ? todayIndex : -1;
+      for (let offset = 1; offset <= DAYS.length; offset += 1) {
+        const day = DAYS[(startIndex + offset) % DAYS.length];
+        const lesson = lessonsForDay(day.key)[0];
+        if (lesson) {
+          return { type: "next", lesson, day };
+        }
+      }
+
+      return null;
+    }
+
+    function renderSmartStatus() {
+      const smart = findSmartLesson();
+      if (!smart) {
+        smartStatus.className = "hero-status next";
+        smartStatus.innerHTML = `
+          <div class="hero-copy">
+            <p class="hero-kicker">時間割</p>
+            <p class="hero-title">授業データなし</p>
+          </div>
+        `;
+        return;
+      }
+
+      const lesson = smart.lesson;
+      const day = smart.day;
+      smartStatus.className = `hero-status ${smart.type}`;
+      smartStatus.innerHTML = `
+        <div class="hero-copy">
+          <p class="hero-kicker">${smart.type === "now" ? "今の授業" : "次の授業"}</p>
+          <p class="hero-title">${lesson.name}</p>
+          <div class="hero-meta">
+            <span class="pill">${day.full}</span>
+            <span class="pill">${formatPeriodRange(lesson)}</span>
+            <span class="pill">${formatLessonTime(lesson)}</span>
+            <span class="pill">${lesson.room}</span>
+          </div>
+        </div>
+        <a class="primary-link" href="${lesson.url}" aria-label="${lesson.name}の出席ページを開く">開く</a>
+      `;
+    }
+
     function buildDesktop() {
+      desktopGrid.innerHTML = "";
+
       const corner = document.createElement("div");
       corner.className = "corner";
       corner.style.gridRow = "1";
@@ -447,102 +728,138 @@
         desktopGrid.appendChild(head);
       });
 
-      for (let period = 1; period <= 10; period += 1) {
+      PERIODS.forEach((period) => {
         const periodCell = document.createElement("div");
         periodCell.className = "period";
-        periodCell.style.gridRow = `${period + 1}`;
+        periodCell.style.gridRow = `${period.number + 1}`;
         periodCell.style.gridColumn = "1";
-        periodCell.textContent = `${period}`;
+        periodCell.textContent = `${period.number}`;
         desktopGrid.appendChild(periodCell);
 
         DAYS.forEach((day, dayIndex) => {
-          const lesson = lessonFor(day.key, period);
-          if (lesson && !isLessonStart(day.key, period)) {
+          const lesson = lessonFor(day.key, period.number);
+          if (lesson && !isLessonStart(day.key, period.number)) {
             return;
           }
 
           if (lesson) {
             const anchor = document.createElement("a");
-            anchor.className = `lesson ${lesson.tone || ""}`.trim();
+            anchor.className = `lesson ${lesson.tone || ""} ${isCurrentLesson(lesson) ? "current" : ""}`.trim();
             anchor.href = lesson.url;
-            anchor.style.gridRow = `${period + 1} / span ${lesson.end - lesson.start + 1}`;
+            anchor.style.gridRow = `${period.number + 1} / span ${lesson.end - lesson.start + 1}`;
             anchor.style.gridColumn = `${dayIndex + 2}`;
-            anchor.setAttribute("aria-label", `${day.full}${lesson.start}から${lesson.end}限 ${lesson.name}`);
-            anchor.innerHTML = `<span class="lesson-name">${lesson.name}</span><span class="lesson-time">${lesson.start}-${lesson.end}限</span>`;
+            anchor.setAttribute("aria-label", `${day.full}${formatPeriodRange(lesson)} ${lesson.name}`);
+            anchor.innerHTML = `
+              <span class="lesson-name">${lesson.name}</span>
+              <span class="lesson-time">${formatPeriodRange(lesson)} / ${lesson.room}</span>
+              <span class="lesson-time">${formatLessonTime(lesson)}</span>
+            `;
             desktopGrid.appendChild(anchor);
           } else {
             const empty = document.createElement("div");
             empty.className = "empty";
-            empty.style.gridRow = `${period + 1}`;
+            empty.style.gridRow = `${period.number + 1}`;
             empty.style.gridColumn = `${dayIndex + 2}`;
             desktopGrid.appendChild(empty);
           }
         });
-      }
+      });
     }
 
-    function buildMobile() {
-      DAYS.forEach((day) => {
-        const panel = document.createElement("div");
-        panel.className = "day-panel";
-        panel.dataset.day = day.key;
+    function createLessonCard(lesson, day) {
+      const anchor = document.createElement("a");
+      anchor.className = `lesson-card ${lesson.tone || ""} ${isCurrentLesson(lesson) ? "current" : ""}`.trim();
+      anchor.href = lesson.url;
+      anchor.setAttribute("aria-label", `${day.full}${formatPeriodRange(lesson)} ${lesson.name}`);
+      anchor.innerHTML = `
+        <span class="lesson-copy">
+          <span class="lesson-card-title">${lesson.name}</span>
+          <span class="lesson-badges">
+            <span class="lesson-badge">${formatLessonTime(lesson)}</span>
+            <span class="lesson-badge">${lesson.room}</span>
+          </span>
+        </span>
+        <span class="arrow" aria-hidden="true">›</span>
+      `;
+      return anchor;
+    }
 
-        for (let period = 1; period <= 10; period += 1) {
-          const lesson = lessonFor(day.key, period);
-          if (lesson && lesson.start !== period) {
-            continue;
-          }
+    function renderDayView(dayKey) {
+      const day = dayByKey(dayKey);
+      dayView.classList.toggle("show-empty", showEmpty);
+      dayView.innerHTML = "";
 
-          const row = document.createElement("div");
-          row.className = "period-card";
-
-          const badge = document.createElement("div");
-          badge.className = "period-badge";
-          badge.textContent = lesson ? `${lesson.start}-${lesson.end}` : `${period}`;
-
-          const body = document.createElement("div");
-          body.className = "period-body";
-
-          if (lesson) {
-            const anchor = document.createElement("a");
-            anchor.className = `mobile-lesson ${lesson.tone || ""}`.trim();
-            anchor.href = lesson.url;
-            anchor.setAttribute("aria-label", `${day.full}${lesson.start}から${lesson.end}限 ${lesson.name}`);
-            anchor.innerHTML = `<span>${lesson.name}</span><span class="arrow" aria-hidden="true">›</span>`;
-            body.appendChild(anchor);
-          } else {
-            const blank = document.createElement("div");
-            blank.className = "blank";
-            blank.textContent = "空き";
-            body.appendChild(blank);
-          }
-
-          row.appendChild(badge);
-          row.appendChild(body);
-          panel.appendChild(row);
+      PERIODS.forEach((period) => {
+        const lesson = lessonFor(day.key, period.number);
+        if (lesson && lesson.start !== period.number) {
+          return;
         }
 
-        mobileDays.appendChild(panel);
+        const row = document.createElement("div");
+        row.className = `period-card${lesson ? "" : " empty-card"}`;
+
+        const badge = document.createElement("div");
+        badge.className = "period-badge";
+        badge.textContent = lesson ? `${lesson.start}-${lesson.end}` : `${period.number}`;
+
+        const body = document.createElement("div");
+        body.className = "period-body";
+
+        if (lesson) {
+          body.appendChild(createLessonCard(lesson, day));
+        } else {
+          const blank = document.createElement("div");
+          blank.className = "blank";
+          blank.textContent = `${period.start}-${period.end}`;
+          body.appendChild(blank);
+        }
+
+        row.appendChild(badge);
+        row.appendChild(body);
+        dayView.appendChild(row);
       });
     }
 
     function selectDay(dayKey) {
+      selectedDay = dayKey;
       tabs.forEach((tab) => {
         tab.setAttribute("aria-selected", String(tab.dataset.day === dayKey));
       });
-
-      document.querySelectorAll(".day-panel").forEach((panel) => {
-        panel.classList.toggle("active", panel.dataset.day === dayKey);
-      });
-
-      const selected = DAYS.find((day) => day.key === dayKey);
+      const selected = dayByKey(dayKey);
       todayLabel.textContent = selected ? selected.full : "時間割";
+      renderDayView(dayKey);
     }
 
+    function selectView(view) {
+      currentView = view;
+      modeButtons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.view === view));
+      });
+      dayView.hidden = view !== "day";
+      weekView.hidden = view !== "week";
+      emptyToggle.hidden = view !== "day";
+    }
+
+    function toggleEmpty() {
+      showEmpty = !showEmpty;
+      emptyToggle.setAttribute("aria-pressed", String(showEmpty));
+      renderDayView(selectedDay);
+    }
+
+    function registerServiceWorker() {
+      if ("serviceWorker" in navigator && location.protocol === "https:") {
+        navigator.serviceWorker.register("sw.js").catch(() => {});
+      }
+    }
+
+    renderSmartStatus();
     buildDesktop();
-    buildMobile();
-    tabs.forEach((tab) => tab.addEventListener("click", () => selectDay(tab.dataset.day)));
     selectDay(defaultDay);
+    selectView(currentView);
+    tabs.forEach((tab) => tab.addEventListener("click", () => selectDay(tab.dataset.day)));
+    modeButtons.forEach((button) => button.addEventListener("click", () => selectView(button.dataset.view)));
+    emptyToggle.addEventListener("click", toggleEmpty);
+    registerServiceWorker();
   </script>
 </body>
 </html>
